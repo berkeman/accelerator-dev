@@ -60,17 +60,15 @@ class Main:
 		# check config file
 		configfile.sanity_check(self.config)
 		self._update_methods()
-		# initialise workspaces
-		selected_workdirs = {self.config['target_workdir'],} | self.config.get('source_workdirs', set())
+		self.current_workspace = self.config['target_workdir']
+		self.current_remote_workspaces = {self.config['target_workdir'],} | self.config.get('source_workdirs', set())
 		self.workspaces = {}
 		for name, data in self.config['workdir'].items():
-			if name not in selected_workdirs:
-				# skip workdirs that are neither target nor source.
-				continue
-			path   = data[0]
-			slices = data[1]
-			self.workspaces[name] = workspace.WorkSpace(name, path, slices)
-		check_missing = selected_workdirs - set(self.workspaces)
+			if name in self.current_remote_workspaces:
+				path   = data[0]
+				slices = data[1]
+				self.workspaces[name] = workspace.WorkSpace(name, path, slices)
+		check_missing = self.current_remote_workspaces - set(self.workspaces)
 		if check_missing:
 			print('\nCONTROL:  Workdir(s) missing definition: ' + ', '.join('\"' + x + '\"' for x in check_missing) + '.')
 			exit(1)
@@ -79,10 +77,6 @@ class Main:
 			print('\nCONTROL:  Not all workdirs have the same number of slices!')
 			exit(1)
 		put_workspaces({k: v.path for k, v in self.workspaces.items()})
-		# set current workspace pointers
-		self.current_workspace = self.config['target_workdir']
-		self.current_remote_workspaces = set(name for name in self.config.get('source_workdirs', []))
-		# and update contents
 		self.DataBase = database.DataBase(self)
 		self.update_database()
 		self.broken = False
