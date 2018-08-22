@@ -70,11 +70,11 @@ class Main:
 				self.workspaces[name] = workspace.WorkSpace(name, path, slices)
 		check_missing = self.source_workdirs - set(self.workspaces)
 		if check_missing:
-			print('\nCONTROL:  Workdir(s) missing definition: ' + ', '.join('\"' + x + '\"' for x in check_missing) + '.')
+			print('\nERROR:  Workdir(s) missing definition: ' + ', '.join('\"' + x + '\"' for x in check_missing) + '.')
 			exit(1)
 		check_slices =  set(self.workspaces[name].slices for name in self.workspaces)
 		if len(check_slices) > 1:
-			print('\nCONTROL:  Not all workdirs have the same number of slices!')
+			print('\nERROR:  Not all workdirs have the same number of slices!')
 			exit(1)
 		put_workspaces({k: v.path for k, v in self.workspaces.items()})
 		self.DataBase = database.DataBase(self)
