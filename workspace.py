@@ -46,19 +46,19 @@ class WorkSpace:
 				with open(filename) as F:
 					file_slices = int(F.read())
 			except IOError:
-				print("\nWORKSPACE:  Create %s-slices.conf in %s." % (self.name, self.path))
+				print("Create %s-slices.conf in %s." % (self.name, self.path))
 				try:
 					with open(filename, 'w') as F:
 						F.write(str(self.slices)+'\n')
 				except IOError:
-					print("\nWORKSPACE:  Could not create %s-slices.conf in %s." % (self.name, self.path))
+					print("\nERROR:  Could not create %s-slices.conf in %s." % (self.name, self.path))
 					return False
 			else:
 				if file_slices != self.slices:
-					print("\nWORKSPACE:  Number of slices in workdir \"%s\" differs from config file!" % (self.name))
+					print("\nERROR:  Number of slices in workdir \"%s\" differs from config file!" % (self.name))
 					return False
 		else:
-			print("\nWORKSPACE:  Directory \"%s\" does not exist!" % (self.path,))
+			print("\nERROR:  Directory \"%s\" does not exist!" % (self.path,))
 			return False
 		return True
 
