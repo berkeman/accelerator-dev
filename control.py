@@ -59,7 +59,7 @@ class Main:
 		configfile.sanity_check(self.config)
 		self._update_methods()
 		self.target_workdir = self.config['target_workdir']
-		self.source_workdirs = set([self.config['target_workdir'],]) | self.config.get('source_workdirs', [])
+		self.source_workdirs = set([self.config['target_workdir'],]) | self.config.get('source_workdirs', set())
 		self.workspaces = {}
 		for name, data in self.config['workdir'].items():
 			if name in self.source_workdirs:
