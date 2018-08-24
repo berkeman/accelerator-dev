@@ -61,23 +61,27 @@ class Main:
 		configfile.sanity_check(self.config)
 		self._update_methods()
 		# initialise workspaces
+		selected_workdirs = {self.config['target_workdir'],} | self.config.get('source_workdirs', set())
 		self.workspaces = {}
 		for name, data in self.config['workdir'].items():
+			if name not in selected_workdirs:
+				# skip workdirs that are neither target nor source.
+				continue
 			path   = data[0]
 			slices = data[1]
-			w = workspace.WorkSpace(name, path, slices)
-			if w.ok:
-				# add only if everything whent well in __init__
-				self.workspaces[name] = w
-			else:
-				# hmm, maybe new target workspace
-				if name == self.config['target_workdir']:
-					self.workspaces[name] = workspace.WorkSpace(name, path, slices, True)
-
+			self.workspaces[name] = workspace.WorkSpace(name, path, slices)
+		check_missing = selected_workdirs - set(self.workspaces)
+		if check_missing:
+			print("\nCONTROL:  Workdir(s) missing definition: " + ', '.join("\"" + x + "\"" for x in check_missing) + ".")
+			exit(1)
+		check_slices =  set(self.workspaces[name].slices for name in self.workspaces)
+		if len(check_slices) > 1:
+			print("\n#CONTROL:  Not all workdirs have the same number of slices!")
+			exit(1)
 		put_workspaces({k: v.path for k, v in self.workspaces.items()})
 		# set current workspace pointers
-		self.set_workspace(self.config['target_workdir'])
-		self.set_remote_workspaces(self.config.get('source_workdirs', ''))
+		self.current_workspace = self.config['target_workdir']
+		self.current_remote_workspaces = set(name for name in self.config.get('source_workdirs', []))
 		# and update contents
 		self.DataBase = database.DataBase(self)
 		self.update_database()
@@ -97,23 +101,6 @@ class Main:
 		except methods.MethodLoadException as e:
 			self.broken = e.module_list
 			return {'broken': e.module_list}
-
-
-	def set_workspace(self, workspacename):
-		""" set current workspace by name, and clear all remotes, just to be sure """
-		self.current_workspace = workspacename
-		self.current_remote_workspaces = set()
-		self.workspaces[workspacename].make_writeable()
-
-	def set_remote_workspaces(self, workspaces):
-		slices = self.workspaces[self.current_workspace].get_slices()
-		self.current_remote_workspaces = set()
-		for name in workspaces:
-			if self.workspaces[name].get_slices() == slices:
-				self.current_remote_workspaces.add(name)
-			else:
-				print("Warning, could not add source workdir \"%s\", since it has %d slices (and %d required from \"%s\")" % (
-					name, self.workspaces[name].get_slices(), slices, self.current_workspace))
 
 
 	def get_workspace_details(self):
