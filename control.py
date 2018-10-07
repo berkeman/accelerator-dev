@@ -61,7 +61,7 @@ class Main:
 		configfile.sanity_check(self.config)
 		self._update_methods()
 		self.current_workspace = self.config['target_workdir']
-		self.current_remote_workspaces = set([self.config['target_workdir'],]) | self.config.get('source_workdirs', set())
+		self.current_remote_workspaces = {self.config['target_workdir'],} | self.config.get('source_workdirs', set())
 		self.workspaces = {}
 		for name, data in self.config['workdir'].items():
 			if name in self.current_remote_workspaces:
@@ -70,11 +70,11 @@ class Main:
 				self.workspaces[name] = workspace.WorkSpace(name, path, slices)
 		check_missing = self.current_remote_workspaces - set(self.workspaces)
 		if check_missing:
-			print("\nCONTROL:  Workdir(s) missing definition: " + ', '.join("\"" + x + "\"" for x in check_missing) + ".")
+			print('\nCONTROL:  Workdir(s) missing definition: ' + ', '.join('\"' + x + '\"' for x in check_missing) + '.')
 			exit(1)
 		check_slices =  set(self.workspaces[name].slices for name in self.workspaces)
 		if len(check_slices) > 1:
-			print("\n#CONTROL:  Not all workdirs have the same number of slices!")
+			print('\nCONTROL:  Not all workdirs have the same number of slices!')
 			exit(1)
 		put_workspaces({k: v.path for k, v in self.workspaces.items()})
 		self.DataBase = database.DataBase(self)
