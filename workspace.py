@@ -42,20 +42,20 @@ class WorkSpace:
 		""" verify or write metadata file in workdir """
 		filename = os.path.join(self.path, "%s-slices.conf" % (self.name,))
 		if not os.path.isdir(self.path):
-			print("\n#ERROR:  Directory \"%s\" does not exist!" % (self.path,))
+			print('\nERROR:  Directory \"%s\" does not exist!' % (self.path,))
 			return False
 		if not os.path.exists(filename):
-			print("\nCreate %s-slices.conf in %s." % (self.name, self.path))
+			print('\nCreate %s-slices.conf in %s.' % (self.name, self.path))
 			try:
 				with open(filename, 'w') as F:
 					F.write(str(self.slices)+'\n')
 			except IOError:
-				print("\n#ERROR:  Could not create %s-slices.conf in %s." % (self.name, self.path))
+				print('\nERROR:  Could not create %s-slices.conf in %s.' % (self.name, self.path))
 				return False
 		with open(filename) as F:
 			file_slices = int(F.read())
 		if file_slices != self.slices:
-			print("\n#ERROR:  Number of slices in workdir \"%s\" differs from config file!" % (self.name))
+			print('\nERROR:  Number of slices in workdir \"%s\" differs from config file!' % (self.name))
 			return False
 		return True
 
